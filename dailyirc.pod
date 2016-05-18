@@ -13,15 +13,31 @@ All argument values have to be surrounded by quotes.
 
 =over 1
 
-=item -user
+=item *
 
-=item -name
+B<-user>: I<Required>; Defines the nickname used.
 
-=item -server
+=item *
 
-=item -channel
+B<-name>: I<Required>; Defines the "real name" used. This parameter can be set
+to anything and is often used for entirely different purposes.
 
-=item -debugger
+=item *
+
+B<-server>: I<Required>; Defines the server to connect to. The server should be
+in the following format:
+
+    your.server.com:1234
+
+=item *
+
+B<-channel>: I<Required>; Defines the channel the client joins after establishing
+a connection to the server.
+
+=item *
+
+B<-debugger>: I<Required>; Prints the raw data received from the server to the
+screen. Has to be set to "yes" in order to work.
 
 =back
 
@@ -29,13 +45,19 @@ All argument values have to be surrounded by quotes.
 
 =head2 General Usage
 
+All commands are started with a slash at the beginning:
+
 =head2 List of Commands
 
 =over 1
 
-=item quit
+=item *
 
-=item help
+B<quit>: Command closes the server connection and closes the client.
+
+=item *
+
+B<help>: Prints a help message.
 
 =back
 
@@ -44,6 +66,9 @@ All argument values have to be surrounded by quotes.
 The author of DailyIRC is github.com/stewa02 <stewatwo@cpan.org>.
 
 =head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2016 by stewa02. This library is free software; you may 
+redistribute it and/or modify it under the same terms as Perl itself.
 
 =cut
 

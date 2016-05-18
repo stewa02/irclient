@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use Term::ANSIColor;
 
 package DailyIRC::Handlers;
 
@@ -16,7 +15,7 @@ sub JOIN {
     my $window = shift;
     my $join   = shift;
     $join =~ m/^:([^\s!%]*)(?:!|%)?\S*(?:@)\S* JOIN (.*)$/;
-    $handle->print($window, "$1 has joined the channel $2\n");
+    $handle->print($window, "\0(statcolor)$1 has joined the channel $2\n");
 }
 
 sub PRIVMSG {
@@ -32,7 +31,7 @@ sub QUIT {
     my $window = shift;
     my $quit   = shift;
     $quit =~ m/^:([^\s!%]*)(?:!|%)?\S*(?:@)\S* QUIT :(.*)$/;
-    $handle->print($window, "$1 has quit: $2\n");
+    $handle->print($window, "\0(statcolor)$1 has quit: $2\n");
 }
 
 1;

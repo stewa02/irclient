@@ -25,18 +25,28 @@ my $vt = Term::Visual->new (
     Errlevel     => 0 
 );
 
+$vt->set_palette ( 
+    mycolor       => "magenta on black",
+    statcolor     => "green on black",
+    metacolour    => "blue on black",
+    sockcolor     => "cyan on black",
+    ncolor        => "white on black",
+    st_frames     => "bright cyan on blue",
+    st_values     => "white on blue",
+    stderr_bullet => "bright white on red",
+    stderr_text   => "bright yellow on black",
+    err_input     => "bright white on red",
+    help          => "white on black",
+    help_cmd      => "bright white on black" 
+);
+
 my $window_id = $vt->create_window (
     Window_Name  => "foo",
- 
     Buffer_Size  => 1000,
     History_Size => 50,
- 
     Input_Prompt => "[foo] ",
- 
-    Use_Title    => 0,
     Use_Status   => 0,
- 
-    Title        => "DailyIRC $VERSION"  
+    Title        => " DailyIRC $VERSION"  
 );
 
 POE::Session->create (
@@ -89,7 +99,7 @@ sub CheckArgs {
 }
 
 sub Intro {
-    $vt->print($window_id, "Connecting to server ".$args{"-server"}
+    $vt->print($window_id, "\0(metacolour)Connecting to server ".$args{"-server"}
         ." on channel ".$args{"-channel"}."!\n");
 }
 
@@ -139,7 +149,7 @@ sub TermInputHandler {
     given ($input) {
         when (/^\/quit/) { DailyIRC::Commands::QUIT($kernel, $vt) }
         when (/^\/help/) { DailyIRC::Commands::HELP($vt, $window_id) }
-        default { $vt->print($window_id, "Invalid command. Type \/help for help.") }
+        default { $vt->print($window_id, "\0(metacolour)Invalid command. Type \/help for help.") }
     }
 }
 
