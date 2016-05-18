@@ -23,7 +23,7 @@ console IRC client. It is inspired by these challenges on
 The client can be opened in the command line:
 
 ```
-perl client.pl -user "username" -name "real name" -server "your.host.com:6667" -channel "#channel"
+dailyirc -user "username" -name "real name" -server "your.host.com:6667" -channel "#channel"
 ```
 
 Arguments should be surrounded by quotes.
@@ -42,6 +42,8 @@ Arguments should be surrounded by quotes.
 
 # To-Do
 
- * Add option to send messages and enter commands
+ * Implement sending private and public messages
+ * Implement commands according to [Reddit thread](https://www.reddit.com/r/dailyprogrammer/comments/4ayjla/challenge_258_hard_irc_interactivity/)
+ * Add multiple channel support and channel switching
  * Add colour support
 

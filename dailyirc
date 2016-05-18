@@ -1,0 +1,161 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use 5.010;
+use lib "./lib";
+use Socket;
+use Term::Visual;
+use POE qw(Component::Client::TCP);
+use DailyIRC::Handlers;
+use DailyIRC::Actions;
+use DailyIRC::Commands;
+
+our $VERSION = 0.2;
+
+#-------------------------------------------------------------------------------
+# Set up terminal UI environment
+#-------------------------------------------------------------------------------
+
+my %args;
+
+my $vt = Term::Visual->new ( 
+    Alias        => "interface",
+    Common_Input => 1,
+    Errlevel     => 0 
+);
+
+my $window_id = $vt->create_window (
+    Window_Name  => "foo",
+ 
+    Buffer_Size  => 1000,
+    History_Size => 50,
+ 
+    Input_Prompt => "[foo] ",
+ 
+    Use_Title    => 0,
+    Use_Status   => 0,
+ 
+    Title        => "DailyIRC $VERSION"  
+);
+
+POE::Session->create (
+    inline_states => {
+        _start         => \&StartHandler,
+        got_term_input => \&TermInputHandler,
+        _stop          => \&StopHandler
+    }
+);
+
+#-------------------------------------------------------------------------------
+# Behaviour
+#-------------------------------------------------------------------------------
+
+sub CheckArgs {
+    my $kernel = shift;
+    my %raw_args;
+    my @required_args = ("-user", "-server", "-name", "-channel");
+    my @possible_args = (@required_args, "-debugger");
+
+    # Check amount of arguments
+    if ($#ARGV % 2) {
+        %raw_args = @ARGV;
+    }
+    else {
+        $vt->print($window_id, "Invalid argument structure!");
+        sleep 1;
+        $kernel->yield('_stop'); 
+    }
+
+    # Check argument validity
+    foreach (keys(%raw_args)) {
+        unless ($_ ~~ @possible_args) {
+            $vt->print($window_id, "Unknown argument '$_'!");
+            sleep 1;
+            $kernel->yield('_stop'); 
+        }
+    }
+
+    # Check if argument list is complete
+    foreach (@required_args) {
+        unless (exists($raw_args{$_})) {
+            $vt->print($window_id, "Argument $_ is missing!");
+            sleep 1;
+            $kernel->yield('_stop'); 
+        }
+    }
+    
+    %args = %raw_args;
+}
+
+sub Intro {
+    $vt->print($window_id, "Connecting to server ".$args{"-server"}
+        ." on channel ".$args{"-channel"}."!\n");
+}
+
+sub Get {
+    my $input  = $_[ARG0];
+    my $server = $_[HEAP]{server};
+
+    $vt->print($window_id, $input) if $args{"-debugger"};
+
+    given ($input) {
+        when (/PING/) { DailyIRC::Actions::PONG($server, $_) }
+        when (/:End of \/MOTD command\./) 
+            { DailyIRC::Actions::JOIN($server, $args{"-channel"}) }
+        when (/JOIN/) { DailyIRC::Handlers::JOIN($vt, $window_id, $_) }
+        when (/^:([^\s!%]*)(?:!|%)?\S*(?:@)\S* PRIVMSG (\S*) :(.*)$/) 
+            { DailyIRC::Handlers::PRIVMSG($vt, $window_id, $_) }
+        when (/QUIT/) { DailyIRC::Handlers::QUIT($vt, $window_id, $_) }
+    }
+}
+
+sub StartHandler {
+    my $kernel = $_[KERNEL];
+    my $handle = $_[HEAP]{server};
+ 
+    # Tell the terminal to send me input as "got_term_input".
+    $kernel->post( interface => send_me_input => "got_term_input" );
+    CheckArgs($kernel);
+    $vt->set_input_prompt($window_id, "[".$args{"-channel"}."] ");
+    Intro();
+
+    my $server = (split(":", $args{"-server"}))[0];
+    my $port   = (split(":", $args{"-server"}))[1];
+    POE::Component::Client::TCP->new(
+        RemoteAddress => $server,
+        RemotePort    => $port,
+        Connected     => sub {
+            DailyIRC::Actions::NICK($_[HEAP]{server}, $args{"-user"});
+            DailyIRC::Actions::USER($_[HEAP]{server}, $args{"-user"}, $args{"-name"});
+        },
+        ServerInput   => \&Get
+    );
+}
+
+sub TermInputHandler {
+    my ($kernel, $heap, $input, $exception) = @_[KERNEL, HEAP, ARG0, ARG1];
+ 
+    given ($input) {
+        when (/^\/quit/) { DailyIRC::Commands::QUIT($kernel, $vt) }
+        when (/^\/help/) { DailyIRC::Commands::HELP($vt, $window_id) }
+        default { $vt->print($window_id, "Invalid command. Type \/help for help.") }
+    }
+}
+
+sub StopHandler {
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
+    $heap->{server}->shutdown();
+    $vt->shutdown;
+    $kernel->alarm_remove_all();
+    if (defined $heap->{input_session}) {
+        delete $heap->{input_session};
+    }
+}
+
+#-------------------------------------------------------------------------------
+# Start program
+#-------------------------------------------------------------------------------
+
+$poe_kernel->run();
+

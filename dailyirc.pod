@@ -1,0 +1,49 @@
+
+=pod
+
+=head1 USAGE
+
+You can open DailyIRC from your command line as follows:
+
+    dailyirc -user "YourUsername" -name "YourRealName" -server "your.server.com:1234" -channel "#channel"
+
+All argument values have to be surrounded by quotes.
+
+=head1 ARGUMENTS
+
+=over 1
+
+=item -user
+
+=item -name
+
+=item -server
+
+=item -channel
+
+=item -debugger
+
+=back
+
+=head1 COMMANDS
+
+=head2 General Usage
+
+=head2 List of Commands
+
+=over 1
+
+=item quit
+
+=item help
+
+=back
+
+=head1 AUTHOR
+
+The author of DailyIRC is github.com/stewa02 <stewatwo@cpan.org>.
+
+=head1 COPYRIGHT AND LICENSE
+
+=cut
+
