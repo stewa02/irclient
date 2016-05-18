@@ -3,8 +3,8 @@
 ## State of the work
 
 Currently the IRC client is only able to connect to one channel and is limited
-to receiving messages. Entering commands and sending messages are not yet 
-implemented. Colours are not supported.
+to receiving messages. The only commands currently implemented are `quit` and
+`help`.
 
 ## Inspiration
 
@@ -40,7 +40,15 @@ Arguments should be surrounded by quotes.
  * **-debugger:** Can be set to "yes" to enable the output of the raw data 
    received from the server.
 
-# To-Do
+## Commands
+
+To call a command rather than writing a message type a slash `/` first. The 
+commands are:
+
+ * **quit:** Close the server connection and exit the client.
+ * **help:** Prints a help message.
+
+# TODO
 
  * Implement sending private and public messages
  * Implement commands according to [Reddit thread](https://www.reddit.com/r/dailyprogrammer/comments/4ayjla/challenge_258_hard_irc_interactivity/)
